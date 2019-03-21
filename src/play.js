@@ -3,16 +3,26 @@ var id = getQueryVariable("id");
 var player_id;
 var connection = new WebSocket('ws://192.168.1.115:8001');
 var chatEnabled = 1;
-
 document.getElementById("buttonmasterdiv").style.display = "none";
 
 connection.onopen = function() {
 	console.log("Connected.");
-	var message = "join ";
-	message += id;
-	message += " ";
-	message += name;
-	connection.send(message);
+	
+	old_id = getCookie("id");
+	if (old_id == id) {
+		var message = "rejoin ";
+		message += id;
+		message += " ";
+		message += getCookie("player_id");
+		connection.send(message);
+	} else {
+		document.cookie = "";
+		var message = "join ";
+		message += id;
+		message += " ";
+		message += name;
+		connection.send(message);
+	}
 };
 
 connection.onmessage = function (message) {
@@ -56,6 +66,7 @@ function parseMessage(message) {
 			break;
 		case "joinaccept":
 			player_id = args[1];
+			document.cookie = "player_id=" + id + "; id=" + id + "; path=/";
 			break;
 		case "status":
 			setStatus(args);
@@ -203,4 +214,20 @@ function renderButtons(nameA, data) {
 	}
 	
 	document.getElementById("buttonmasterdiv").style.display = "block";
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }

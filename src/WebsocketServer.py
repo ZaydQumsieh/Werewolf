@@ -435,6 +435,10 @@ async def on_connection(websocket, path):
         if (args[0] == "masterjoin"):
             await master_join(args, websocket)
 
+        if (args[0] == "rejoin"):
+            # TODO: Is the disconnected variable realy important?
+            if games[args[1]].get_player(args[2]).disconnected:
+                pass
 
 
 
